@@ -377,8 +377,8 @@ async def main(session_id: str) -> None:
     except ImportError:
         raise ImportError("Install websockets: pip install websockets") from None
 
-    host = os.environ.get("RELAYKIT_HOST", "localhost")
-    port = os.environ.get("RELAYKIT_PORT", "8000")
+    host = os.environ.get("LIVELINK_HOST", "localhost")
+    port = os.environ.get("LIVELINK_PORT", "8000")
     uri = f"ws://{host}:{port}/supervise/{session_id}"
 
     print(_HEADER)

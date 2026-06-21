@@ -1,6 +1,6 @@
 """Customer Escalation Handler — collaborative realtime supervision demo.
 
-Demonstrates RelayKit as a supervised realtime AI runtime through a multi-step
+Demonstrates LiveLink as a supervised realtime AI runtime through a multi-step
 cascading outage investigation. The agent narrates evolving hypotheses, checks
 infrastructure telemetry, correlates signals, and escalates when confidence is
 insufficient — all observable and steerable by a connected supervisor.
@@ -24,7 +24,7 @@ import logging
 import random
 from collections import deque
 
-from relaykit import LiveAgent, Runner, SessionConfig, WebSocketTransport
+from livelink import LiveAgent, Runner, SessionConfig, WebSocketTransport
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -566,9 +566,9 @@ async def main() -> None:
         import websockets.http11
         import websockets.datastructures
     except ImportError:
-        raise ImportError("Install websockets: pip install relaykit[serve]") from None
+        raise ImportError("Install websockets: pip install livelink[serve]") from None
 
-    from relaykit._ui import DEFAULT_HTML
+    from livelink._ui import DEFAULT_HTML
 
     def process_request(connection, request):
         if request.path in ("/", ""):
@@ -644,7 +644,7 @@ async def main() -> None:
 
 async def _handle_supervision_with_inject(ws, session_id: str) -> None:
     """Wrap handle_supervision to intercept 'inject' commands before passing through."""
-from relaykit.supervise import (
+    from livelink.supervise import (
         _parse,
         _send,
         get_session,
@@ -759,8 +759,8 @@ async def _sender(ws, queue: asyncio.Queue) -> None:
 
 async def _receiver_with_inject(ws, send_queue, session, input_manager, cancellation_token) -> None:
     """Process commands including the 'inject' extension for supervisor guidance."""
-    from relaykit.supervise import _parse
-    from relaykit.supervision.hitl import InputStatus
+    from livelink.supervise import _parse
+    from livelink.supervision.hitl import InputStatus
 
     async for raw in ws:
         cmd = _parse(raw)
@@ -856,7 +856,7 @@ async def _receiver_with_inject(ws, send_queue, session, input_manager, cancella
             send_queue.put_nowait({"type": "ack", "cmd_id": cmd_id, "detail": {}})
 
         elif cmd_type == "inspect":
-            from relaykit.supervise import _get_pending_approvals
+            from livelink.supervise import _get_pending_approvals
 
             detail = {
                 "session_id": session.session_id,

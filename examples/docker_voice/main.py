@@ -6,7 +6,7 @@ Run via docker-compose:
 Then open http://localhost:8000 in a browser.
 """
 
-from relaykit import LiveAgent
+from livelink import LiveAgent
 
 agent = LiveAgent(
     model="gemini/gemini-2.5-flash-native-audio",

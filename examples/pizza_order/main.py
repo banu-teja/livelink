@@ -6,7 +6,7 @@ Then open http://localhost:8001 in a browser.
 
 import logging
 
-from relaykit import LiveAgent
+from livelink import LiveAgent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "relaykit"
+name = "livelink"
 version = "0.1.0"
 description = "Thin adapter layer for live/realtime AI model APIs (Gemini Live, OpenAI Realtime)"
 readme = "README.md"
@@ -32,7 +32,7 @@ dev = [
 pydub = ["pydub>=0.25.0"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/relaykit"]
+packages = ["src/livelink"]
 
 [tool.ruff]
 line-length = 100

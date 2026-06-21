@@ -6,7 +6,7 @@ Then open http://localhost:8004 in a browser.
 Try mentioning "social security number" or "credit card" to trigger the input guardrail.
 """
 
-from relaykit import GuardrailResult, LiveAgent, input_guardrail, output_guardrail
+from livelink import GuardrailResult, LiveAgent, input_guardrail, output_guardrail
 
 PII_KEYWORDS = ["ssn", "social security", "credit card", "card number"]
 

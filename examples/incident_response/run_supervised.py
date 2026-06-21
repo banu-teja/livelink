@@ -1,4 +1,4 @@
-"""Run the incident response agent WITH RelayKit supervision — the 'after' experience.
+"""Run the incident response agent WITH LiveLink supervision — the 'after' experience.
 
 Same graph. Same agent. Zero modifications. Just wrapped in supervise().
 Run: uv run python examples/incident_response/run_supervised.py
@@ -13,11 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from relaykit.integrations.langchain import LangGraphAdapter
-from relaykit.supervision.cancellation import CancellationToken
-from relaykit.supervision.events import EventBus
-from relaykit.supervision.hitl import InputManager
-from relaykit.supervision.runtime_events import (
+from livelink.integrations.langchain import LangGraphAdapter
+from livelink.supervision.cancellation import CancellationToken
+from livelink.supervision.events import EventBus
+from livelink.supervision.hitl import InputManager
+from livelink.supervision.runtime_events import (
     ExecutionCancelled,
     ExecutionCompleted,
     ExecutionFailed,
@@ -29,7 +29,7 @@ from relaykit.supervision.runtime_events import (
     ToolCallFailed,
     ToolCallStarted,
 )
-from relaykit.supervision.supervise import supervise
+from livelink.supervision.supervise import supervise
 
 from agent import INITIAL_STATE, graph
 
@@ -37,7 +37,7 @@ from agent import INITIAL_STATE, graph
 def format_event(event: object) -> str | None:
     """Format a RuntimeEvent for terminal display."""
     if isinstance(event, ExecutionStarted):
-        return f"\n{'=' * 60}\n=== Incident Response (Supervised with RelayKit) ===\n{'=' * 60}"
+        return f"\n{'=' * 60}\n=== Incident Response (Supervised with LiveLink) ===\n{'=' * 60}"
     if isinstance(event, StepStarted):
         return f"  -> Step: {event.step_name}"
     if isinstance(event, ToolCallStarted):
