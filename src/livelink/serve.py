@@ -62,19 +62,19 @@ async def serve(
 
     Args:
         agent: The agent to serve.
-        host: Bind address. Defaults to RELAYKIT_HOST env var or "0.0.0.0".
+        host: Bind address. Defaults to LIVELINK_HOST env var or "0.0.0.0".
         port: Bind port. Defaults to PORT env var or 8000.
         ui: Serve built-in audio client at /.
         ui_path: Path to custom static HTML file to serve instead of built-in UI.
         deps: Dependency injection object passed to tools via ToolContext.
         cors: Enable CORS headers for cross-origin requests.
-        max_sessions: Maximum concurrent sessions. Defaults to RELAYKIT_MAX_SESSIONS or 100.
+        max_sessions: Maximum concurrent sessions. Defaults to LIVELINK_MAX_SESSIONS or 100.
         drain_timeout: Seconds to wait for sessions to finish on shutdown. Defaults to 300.
     """
-    resolved_host = host or os.environ.get("RELAYKIT_HOST", "0.0.0.0")
-    resolved_port = port or int(os.environ.get("PORT", os.environ.get("RELAYKIT_PORT", "8000")))
+    resolved_host = host or os.environ.get("LIVELINK_HOST", "0.0.0.0")
+    resolved_port = port or int(os.environ.get("PORT", os.environ.get("LIVELINK_PORT", "8000")))
     resolved_max = max_sessions or int(
-        os.environ.get("RELAYKIT_MAX_SESSIONS", str(_DEFAULT_MAX_SESSIONS))
+        os.environ.get("LIVELINK_MAX_SESSIONS", str(_DEFAULT_MAX_SESSIONS))
     )
     resolved_drain = drain_timeout if drain_timeout is not None else _DEFAULT_DRAIN_TIMEOUT
     try:
