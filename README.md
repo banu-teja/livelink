@@ -1,8 +1,22 @@
 # LiveLink
 
-The supervised runtime for voice AI agents.
+**The supervised runtime for voice AI agents.**
+
+[![PyPI](https://img.shields.io/pypi/v/livelink)](https://pypi.org/project/livelink/)
+[![Python](https://img.shields.io/pypi/pyversions/livelink)](https://pypi.org/project/livelink/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/banu-teja/livelink/blob/main/LICENSE)
 
 5 lines to a working voice agent. Add tools in +3. Add guardrails in +5. Grow to multi-agent without rewriting.
+
+```python
+from livelink import LiveAgent
+
+agent = LiveAgent(
+    model="gemini/gemini-2.5-flash-native-audio",
+    instructions="You are a helpful voice assistant.",
+)
+agent.serve()  # opens http://localhost:8000 — talk to your agent
+```
 
 ## Install
 
@@ -126,29 +140,21 @@ pip install livelink[langchain]
 ```
 Run any LangGraph graph as a voice agent with full interrupt/resume support.
 
-## Docker
-
-```bash
-export GOOGLE_API_KEY=your-key
-docker-compose up
-# Open http://localhost:8000
-```
-
 ## Architecture
 
 One runtime path, progressively revealed:
 
 ```
-agent.serve()                         # 5 lines — zero config
-Runner.run(agent, transport, on_*=…)  # 15 lines — callbacks + lifecycle
-agent.session(config=…).run(transport)# 30+ lines — full control
+agent.serve()                          # 5 lines — zero config
+Runner.run(agent, transport, on_*=…)   # 15 lines — callbacks + lifecycle
+agent.session(config=…).run(transport) # 30+ lines — full control
 ```
 
 `LiveAgent` is pure config. `RealtimeSession` is the runtime. `Runner` manages the lifecycle between them. Adapters translate provider-specific protocols — your code never sees the difference.
 
 ## Examples
 
-See [`examples/`](examples/) for runnable demos:
+See [`examples/`](https://github.com/banu-teja/livelink/tree/main/examples) for runnable demos:
 
 - `minimal_voice/` — simplest possible agent
 - `pizza_order/` — tool use with structured state
