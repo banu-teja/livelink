@@ -5,14 +5,33 @@ build-backend = "hatchling.build"
 [project]
 name = "livelink"
 version = "0.1.0"
-description = "Thin adapter layer for live/realtime AI model APIs (Gemini Live, OpenAI Realtime)"
+description = "Supervised runtime for voice AI agents — Gemini Live, OpenAI Realtime, one interface"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
+keywords = ["voice", "ai", "agent", "realtime", "gemini", "openai", "websocket", "multimodal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
 dependencies = [
     "numpy>=1.24.0",
     "soundfile>=0.12.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/banu-teja/livelink"
+Repository = "https://github.com/banu-teja/livelink"
+"Bug Tracker" = "https://github.com/banu-teja/livelink/issues"
 
 [project.optional-dependencies]
 gemini = ["google-genai>=1.0.0"]
