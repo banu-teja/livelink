@@ -644,7 +644,7 @@ async def main() -> None:
 
 async def _handle_supervision_with_inject(ws, session_id: str) -> None:
     """Wrap handle_supervision to intercept 'inject' commands before passing through."""
-from relaykit.supervise import (
+    from relaykit.supervise import (
         _parse,
         _send,
         get_session,
