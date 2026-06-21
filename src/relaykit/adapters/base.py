@@ -94,6 +94,13 @@ class BaseAdapter(ABC):
         periodic signals to maintain connections (e.g. Gemini needs silence packets).
         """
 
+    async def deliver_runtime_context(self, content: str, *, transient: bool = True) -> None:
+        """Inject operational context into the live session.
+
+        Provider-specific implementation. No-op by default.
+        Providers override to use their native context injection mechanism.
+        """
+
     @property
     @abstractmethod
     def is_connected(self) -> bool:

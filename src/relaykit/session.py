@@ -79,6 +79,7 @@ class RealtimeSession:
             history=self._history,
         )
         self._pending_handoff: str | None = None
+        self._active_delegations: dict[str, Any] = {}
         self._session_start_time: float = 0.0
         self._turn_start_time: float | None = None
         self._turn_text_buffer: list[str] = []
@@ -470,6 +471,18 @@ class RealtimeSession:
                 await self.close()
                 return
 
+        # Check for delegation sentinel in results (does not close session)
+        from relaykit.delegation import is_delegation_result, parse_delegation_result
+
+        for i, result in enumerate(all_results):
+            if not result.is_error and is_delegation_result(result.output):
+                name, context = parse_delegation_result(result.output)
+                await self._start_delegation(name, context)
+                tool_responses[i] = ToolResponse(
+                    call_id=result.call_id,
+                    result=f"Delegation to '{name}' started. You will receive operational updates.",
+                )
+
         await self._adapter.send_tool_response(tool_responses)
         self._tool_call_count += 1
 
@@ -597,18 +610,102 @@ class RealtimeSession:
             finally:
                 self._connected = False
 
+    # --- Delegation lifecycle ---
+
+    async def _start_delegation(self, backend_name: str, context: str) -> None:
+        """Start a delegated execution as a background task."""
+        from relaykit.delegation import DelegationHandle, DelegationState
+        from relaykit.memory import OperationalMemory
+        from relaykit.relay import SupervisionRelay
+        from relaykit.supervision import CancellationToken, EventBus, InputManager, supervise
+
+        backend = self._find_backend(backend_name)
+        if backend is None:
+            logger.warning("No backend found with name: %s", backend_name)
+            return
+
+        run_id = uuid.uuid4().hex
+        bus = EventBus()
+        input_mgr = InputManager(event_bus=bus)
+        cancel_token = CancellationToken()
+        memory = OperationalMemory()
+
+        async def _inject_signal(signal: Any) -> None:
+            memory.record(signal)
+            if self._adapter and hasattr(self._adapter, "deliver_runtime_context"):
+                rendered = f"[Runtime: {signal.summary}]"
+                await self._adapter.deliver_runtime_context(rendered, transient=True)
+
+        relay = SupervisionRelay(
+            policy=backend.policy,
+            event_bus=bus,
+            inject=_inject_signal,
+        )
+        await relay.start(run_id=run_id)
+
+        handle = DelegationHandle(
+            backend_name=backend_name,
+            run_id=run_id,
+            state=DelegationState.RUNNING,
+            relay=relay,
+            event_bus=bus,
+            input_manager=input_mgr,
+            cancellation_token=cancel_token,
+            operational_memory=memory,
+        )
+
+        async def _run_supervised() -> None:
+            try:
+                result = await supervise(
+                    backend.adapter,
+                    context,
+                    event_bus=bus,
+                    input_manager=input_mgr,
+                    cancellation_token=cancel_token,
+                    interrupt_timeout=backend.policy.interrupt_timeout,
+                    run_id=run_id,
+                )
+                handle.state = DelegationState.COMPLETED
+                handle.result = result
+            except asyncio.CancelledError:
+                handle.state = DelegationState.CANCELLED
+            except Exception as exc:
+                handle.state = DelegationState.FAILED
+                logger.warning("Delegation '%s' failed: %s", backend_name, exc)
+            finally:
+                handle.completed_at = time.time()
+                await relay.stop()
+
+        task = asyncio.create_task(_run_supervised())
+        handle.task = task
+
+        def _on_cancel() -> None:
+            task.cancel()
+
+        cancel_token.on_cancel(_on_cancel)
+        self._active_delegations[backend_name] = handle
+
+    def _find_backend(self, name: str) -> Any:
+        """Look up a declared DelegatedBackend by name."""
+        for d in self._agent._delegations:
+            if d.name == name:
+                return d
+        return None
+
     # --- Supervision helpers (no-ops when supervision=False) ---
 
     def _register_for_supervision(self) -> None:
         """Register this session in the global registry for external supervision."""
         if self._config.supervision:
             from relaykit.supervise import register_session
+
             register_session(self._session_id, self)
 
     def _unregister_from_supervision(self) -> None:
         """Remove this session from the global registry."""
         if self._config.supervision:
             from relaykit.supervise import unregister_session
+
             unregister_session(self._session_id)
 
     def _transition_state(self, _target: str) -> None:

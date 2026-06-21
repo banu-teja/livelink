@@ -14,6 +14,7 @@ from typing import Any, Callable, Literal, TYPE_CHECKING
 from relaykit.tools import Tool, ToolRegistry
 
 if TYPE_CHECKING:
+    from relaykit.delegation import DelegatedBackend
     from relaykit.guardrails import Guardrail
     from relaykit.handoff import Handoff
     from relaykit.hooks import AgentHooks
@@ -63,6 +64,7 @@ class LiveAgent:
         "_hooks",
         "_config",
         "_handoffs",
+        "_delegations",
         "_input_guardrails",
         "_output_guardrails",
         "_frozen",
@@ -78,6 +80,7 @@ class LiveAgent:
         hooks: AgentHooks | None = None,
         config: AgentConfig | dict[str, Any] | None = None,
         handoffs: list[Handoff] | None = None,
+        delegations: list[DelegatedBackend] | None = None,
         input_guardrails: list[Guardrail] | None = None,
         output_guardrails: list[Guardrail] | None = None,
     ) -> None:
@@ -90,12 +93,18 @@ class LiveAgent:
         object.__setattr__(self, "_hooks", hooks)
         object.__setattr__(self, "_config", config or AgentConfig())
         object.__setattr__(self, "_handoffs", list(handoffs or []))
+        object.__setattr__(self, "_delegations", list(delegations or []))
         object.__setattr__(self, "_input_guardrails", list(input_guardrails or []))
         object.__setattr__(self, "_output_guardrails", list(output_guardrails or []))
         object.__setattr__(self, "_frozen", False)
 
         for h in self._handoffs:
             self._tools.add(h.to_tool())
+
+        for d in self._delegations:
+            from relaykit.delegation import generate_delegation_tool
+
+            self._tools.add(generate_delegation_tool(d))
 
     @property
     def model(self) -> str:
@@ -124,6 +133,10 @@ class LiveAgent:
     @property
     def handoffs(self) -> list[Handoff]:
         return self._handoffs
+
+    @property
+    def delegations(self) -> list[DelegatedBackend]:
+        return self._delegations
 
     @property
     def input_guardrails(self) -> list[Guardrail]:

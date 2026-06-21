@@ -271,9 +271,10 @@ async def supervise(
     cancellation_token: CancellationToken | None = None,
     interrupt_timeout: float | None = None,
     token_coalesce_ms: float = 50.0,
+    run_id: str | None = None,
 ) -> SupervisedRun:
     """Supervise execution of an adapter, emitting RuntimeEvents and handling interrupts."""
-    run_id = uuid.uuid4().hex
+    run_id = run_id or uuid.uuid4().hex
     bus = event_bus if event_bus is not None else EventBus()
     source = getattr(adapter, "SOURCE", "unknown_adapter")
     start_time = time.monotonic()

@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from relaykit.agent import AgentConfig, LiveAgent
+from relaykit.delegation import DelegatedBackend
 from relaykit.exceptions import RelayKitError
+from relaykit.governance import GovernancePolicy, GovernanceRule, ResolutionAuthority
 from relaykit.guardrails import GuardrailResult, input_guardrail, output_guardrail
 from relaykit.handoff import Handoff
 from relaykit.hooks import AgentHooks
 from relaykit.runner import Runner, RunResult
 from relaykit.session import RealtimeSession
 from relaykit.session_config import SessionConfig
+from relaykit.signals import InterruptMode, OperationalContextPolicy, OperationalSignal, RuntimeSignal
 from relaykit.streaming import (
     AudioDelta,
     AudioFrame,
@@ -28,13 +31,21 @@ __all__ = [
     "AgentHooks",
     "AudioDelta",
     "AudioFrame",
+    "DelegatedBackend",
+    "GovernancePolicy",
+    "GovernanceRule",
     "GuardrailResult",
     "Handoff",
+    "InterruptMode",
     "LiveAgent",
+    "OperationalContextPolicy",
+    "OperationalSignal",
     "RealtimeSession",
     "RelayKitError",
+    "ResolutionAuthority",
     "RunResult",
     "Runner",
+    "RuntimeSignal",
     "SessionConfig",
     "StreamEvent",
     "StreamInterrupted",
