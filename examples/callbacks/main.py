@@ -10,7 +10,7 @@ turn tracking, and error handling.
 import asyncio
 import logging
 
-from relaykit import LiveAgent, Runner, WebSocketTransport
+from livelink import LiveAgent, Runner, WebSocketTransport
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ async def main() -> None:
     try:
         from websockets.asyncio.server import serve as ws_serve
     except ImportError:
-        raise ImportError("Install websockets: pip install relaykit[serve]") from None
+        raise ImportError("Install websockets: pip install livelink[serve]") from None
 
     async def handle_connection(connection) -> None:
         transport = WebSocketTransport(connection)

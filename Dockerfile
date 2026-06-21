@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 
 RUN pip install uv
 
-RUN useradd --create-home --shell /bin/bash relaykit
+RUN useradd --create-home --shell /bin/bash livelink
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY examples/ examples/
 
 RUN uv pip install --system ".[gemini,serve]"
 
-USER relaykit
+USER livelink
 
 EXPOSE 8000
 

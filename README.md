@@ -7,9 +7,9 @@ The supervised runtime for voice AI agents.
 ## Install
 
 ```bash
-pip install relaykit[gemini,serve]   # Gemini Live
-pip install relaykit[openai,serve]   # OpenAI Realtime
-pip install relaykit[all]            # All providers + serve
+pip install livelink[gemini,serve]   # Gemini Live
+pip install livelink[openai,serve]   # OpenAI Realtime
+pip install livelink[all]            # All providers + serve
 ```
 
 Requires Python 3.10+.
@@ -23,7 +23,7 @@ export GOOGLE_API_KEY=your-key-here
 ```
 
 ```python
-from relaykit import LiveAgent
+from livelink import LiveAgent
 
 agent = LiveAgent(
     model="gemini/gemini-2.5-flash-native-audio",
@@ -37,7 +37,7 @@ Open http://localhost:8000. Talk to your agent.
 ## Add a Tool (+3 lines)
 
 ```python
-from relaykit import LiveAgent
+from livelink import LiveAgent
 
 agent = LiveAgent(
     model="gemini/gemini-2.5-flash-native-audio",
@@ -57,7 +57,7 @@ Tool schemas are inferred automatically from type hints and docstrings.
 ## Add Guardrails (+5 lines)
 
 ```python
-from relaykit import LiveAgent, input_guardrail, GuardrailResult
+from livelink import LiveAgent, input_guardrail, GuardrailResult
 
 @input_guardrail
 async def block_pii(content: str) -> GuardrailResult:
@@ -78,7 +78,7 @@ Guardrails run at every input/output boundary. Chain multiple, modify content, o
 ## Multi-Agent Handoffs (+8 lines)
 
 ```python
-from relaykit import LiveAgent, Handoff
+from livelink import LiveAgent, Handoff
 
 billing = LiveAgent(
     model="gemini/gemini-2.5-flash-native-audio",
@@ -122,7 +122,7 @@ The transport stays open. Conversation history accumulates across swaps.
 
 **LangGraph integration**
 ```bash
-pip install relaykit[langchain]
+pip install livelink[langchain]
 ```
 Run any LangGraph graph as a voice agent with full interrupt/resume support.
 

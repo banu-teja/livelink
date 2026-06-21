@@ -13,11 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from relaykit.integrations.langchain import LangGraphAdapter
-from relaykit.supervision.cancellation import CancellationToken
-from relaykit.supervision.events import EventBus
-from relaykit.supervision.hitl import InputManager
-from relaykit.supervision.runtime_events import (
+from livelink.integrations.langchain import LangGraphAdapter
+from livelink.supervision.cancellation import CancellationToken
+from livelink.supervision.events import EventBus
+from livelink.supervision.hitl import InputManager
+from livelink.supervision.runtime_events import (
     ExecutionCancelled,
     ExecutionCompleted,
     ExecutionFailed,
@@ -29,7 +29,7 @@ from relaykit.supervision.runtime_events import (
     ToolCallFailed,
     ToolCallStarted,
 )
-from relaykit.supervision.supervise import supervise
+from livelink.supervision.supervise import supervise
 
 from agent import INITIAL_STATE, graph
 

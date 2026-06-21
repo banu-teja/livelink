@@ -1,4 +1,4 @@
-"""Root conftest: add src/ to sys.path so relaykit is importable in tests."""
+"""Root conftest: add src/ to sys.path so livelink is importable in tests."""
 
 from __future__ import annotations
 

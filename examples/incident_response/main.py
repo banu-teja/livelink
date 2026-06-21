@@ -16,12 +16,12 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from relaykit import LiveAgent, ToolContext
-from relaykit.integrations.langchain import LangGraphAdapter
-from relaykit.supervision.cancellation import CancellationToken
-from relaykit.supervision.events import EventBus
-from relaykit.supervision.hitl import InputManager
-from relaykit.supervision.runtime_events import (
+from livelink import LiveAgent, ToolContext
+from livelink.integrations.langchain import LangGraphAdapter
+from livelink.supervision.cancellation import CancellationToken
+from livelink.supervision.events import EventBus
+from livelink.supervision.hitl import InputManager
+from livelink.supervision.runtime_events import (
     ExecutionCompleted,
     ExecutionFailed,
     InterruptRequested,
@@ -29,7 +29,7 @@ from relaykit.supervision.runtime_events import (
     ToolCallCompleted,
     ToolCallStarted,
 )
-from relaykit.supervision.supervise import supervise
+from livelink.supervision.supervise import supervise
 
 from agent import INITIAL_STATE, graph
 

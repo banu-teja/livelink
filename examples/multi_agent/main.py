@@ -7,7 +7,7 @@ Say something like "I have a billing question" or "My internet is not working"
 to trigger a handoff to the appropriate specialist.
 """
 
-from relaykit import Handoff, LiveAgent
+from livelink import Handoff, LiveAgent
 
 billing = LiveAgent(
     model="gemini/gemini-2.5-flash-native-audio",

@@ -10,8 +10,8 @@ Connect the supervisor CLI to approve/reject tool calls in real time.
 import asyncio
 import logging
 
-from relaykit import LiveAgent, Runner, SessionConfig, WebSocketTransport
-from relaykit.supervise import handle_supervision
+from livelink import LiveAgent, Runner, SessionConfig, WebSocketTransport
+from livelink.supervise import handle_supervision
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ async def main() -> None:
     try:
         from websockets.asyncio.server import serve as ws_serve
     except ImportError:
-        raise ImportError("Install websockets: pip install relaykit[serve]") from None
+        raise ImportError("Install websockets: pip install livelink[serve]") from None
 
     async def handle_connection(connection) -> None:
         path = getattr(getattr(connection, "request", None), "path", "")
