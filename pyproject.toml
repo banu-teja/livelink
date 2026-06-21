@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livelink"
-version = "0.1.0"
+version = "0.1.1"
 description = "Supervised runtime for voice AI agents — Gemini Live, OpenAI Realtime, one interface"
 readme = "README.md"
 license = { text = "MIT" }
