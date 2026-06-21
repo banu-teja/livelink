@@ -1,6 +1,6 @@
 """Supervision layer: realtime conversational supervision of external workflows.
 
-This package provides the primitives for RelayKit to act as a conversational
+This package provides the primitives for LiveLink to act as a conversational
 supervision layer over external orchestrators (LangGraph, Temporal, etc.)
 without owning their execution model.
 """

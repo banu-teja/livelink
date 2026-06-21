@@ -8,12 +8,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal
 
-from livelink.exceptions import RelayKitError
+from livelink.exceptions import LiveLinkError
 
 logger = logging.getLogger(__name__)
 
 
-class InputTimeoutError(RelayKitError):
+class InputTimeoutError(LiveLinkError):
     def __init__(self, request_id: str, question: str, timeout: float) -> None:
         self.request_id = request_id
         self.question = question
@@ -21,7 +21,7 @@ class InputTimeoutError(RelayKitError):
         super().__init__(f"Input request {request_id} timed out after {timeout}s: {question!r}")
 
 
-class InputCancelledError(RelayKitError):
+class InputCancelledError(LiveLinkError):
     def __init__(self, request_id: str, reason: str) -> None:
         self.request_id = request_id
         self.reason = reason

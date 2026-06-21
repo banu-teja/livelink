@@ -9,14 +9,14 @@ import threading
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Callable, Coroutine, TypeVar
 
-from livelink.exceptions import RelayKitError
+from livelink.exceptions import LiveLinkError
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
 
-class CancelledByToken(RelayKitError):
+class CancelledByToken(LiveLinkError):
     """Raised when work is cancelled via a CancellationToken."""
 
     def __init__(self, reason: str = "", partial_result: Any = None) -> None:

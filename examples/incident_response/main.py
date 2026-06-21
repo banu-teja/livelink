@@ -4,7 +4,7 @@ Run: uv run python examples/incident_response/main.py
 Then open http://localhost:8002 in your browser.
 
 An operator interacts via voice with a LiveAgent that orchestrates a background
-LangGraph investigation agent through RelayKit's supervision pipeline.
+LangGraph investigation agent through LiveLink's supervision pipeline.
 """
 
 from __future__ import annotations

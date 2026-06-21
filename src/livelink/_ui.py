@@ -7,7 +7,7 @@ Uses ScriptProcessor for maximum browser compatibility.
 from __future__ import annotations
 
 DEFAULT_HTML = """<!DOCTYPE html>
-<html><head><title>RelayKit Voice Agent</title></head>
+<html><head><title>LiveLink Voice Agent</title></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:40px auto;padding:20px">
 <h1>Voice Agent</h1>
 <p>Click Start and speak naturally. The agent will respond with voice.</p>

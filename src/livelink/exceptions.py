@@ -1,46 +1,46 @@
-class RelayKitError(Exception):
+class LiveLinkError(Exception):
     pass
 
 
-class AuthenticationError(RelayKitError):
+class AuthenticationError(LiveLinkError):
     pass
 
 
-class SessionNotReadyError(RelayKitError):
+class SessionNotReadyError(LiveLinkError):
     pass
 
 
-class SessionExpiredError(RelayKitError):
+class SessionExpiredError(LiveLinkError):
     pass
 
 
-class SessionBusyError(RelayKitError):
+class SessionBusyError(LiveLinkError):
     """Raised when send/stream is called while another operation is in progress."""
 
     pass
 
 
-class InvalidStateError(RelayKitError):
+class InvalidStateError(LiveLinkError):
     """Raised on an invalid connection state transition."""
 
     pass
 
 
-class AdapterError(RelayKitError):
+class AdapterError(LiveLinkError):
     pass
 
 
-class UnsupportedFormatError(RelayKitError):
+class UnsupportedFormatError(LiveLinkError):
     pass
 
 
-class UnsupportedModalityError(RelayKitError):
+class UnsupportedModalityError(LiveLinkError):
     pass
 
 
-class ConnectionError(RelayKitError):
+class ConnectionError(LiveLinkError):
     pass
 
 
-class RateLimitError(RelayKitError):
+class RateLimitError(LiveLinkError):
     pass

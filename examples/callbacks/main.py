@@ -51,7 +51,7 @@ async def main() -> None:
         )
         logger.info("[done] %d turns, reason=%s", result.turn_count, result.stopped_reason)
 
-    print("RelayKit agent -> http://localhost:8005")
+    print("LiveLink agent -> http://localhost:8005")
     async with ws_serve(handle_connection, "localhost", 8005):
         await asyncio.Future()
 

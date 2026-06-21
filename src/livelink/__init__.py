@@ -1,10 +1,10 @@
-"""RelayKit — Unified realtime multimodal runtime across providers."""
+"""LiveLink — Unified realtime multimodal runtime across providers."""
 
 from __future__ import annotations
 
 from livelink.agent import AgentConfig, LiveAgent
 from livelink.delegation import DelegatedBackend
-from livelink.exceptions import RelayKitError
+from livelink.exceptions import LiveLinkError
 from livelink.governance import GovernancePolicy, GovernanceRule, ResolutionAuthority
 from livelink.guardrails import GuardrailResult, input_guardrail, output_guardrail
 from livelink.handoff import Handoff
@@ -46,7 +46,7 @@ __all__ = [
     "OperationalContextPolicy",
     "OperationalSignal",
     "RealtimeSession",
-    "RelayKitError",
+    "LiveLinkError",
     "ResolutionAuthority",
     "RunResult",
     "Runner",

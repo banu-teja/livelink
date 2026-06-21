@@ -157,8 +157,8 @@ async def serve(
         return None
 
     url = f"http://{resolved_host}:{resolved_port}"
-    logger.info("RelayKit agent serving at %s", url)
-    print(f"RelayKit agent → {url}")
+    logger.info("LiveLink agent serving at %s", url)
+    print(f"LiveLink agent → {url}")
 
     async with ws_serve(
         handle_connection,

@@ -1,6 +1,6 @@
 """Customer Escalation Handler — collaborative realtime supervision demo.
 
-Demonstrates RelayKit as a supervised realtime AI runtime through a multi-step
+Demonstrates LiveLink as a supervised realtime AI runtime through a multi-step
 cascading outage investigation. The agent narrates evolving hypotheses, checks
 infrastructure telemetry, correlates signals, and escalates when confidence is
 insufficient — all observable and steerable by a connected supervisor.
