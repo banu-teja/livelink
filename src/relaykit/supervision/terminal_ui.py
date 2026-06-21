@@ -28,13 +28,13 @@ _BOLD = "\033[1m"
 _DIM = "\033[2m"
 
 # Foreground colors (semantic)
-_FG_CYAN = "\033[36m"       # session/system events
-_FG_GREEN = "\033[32m"      # success, approvals, completions
-_FG_YELLOW = "\033[33m"     # warnings, pending decisions
-_FG_RED = "\033[31m"        # errors, rejections
-_FG_MAGENTA = "\033[35m"    # tool execution
-_FG_BLUE = "\033[34m"       # progress/narration
-_FG_WHITE = "\033[37m"      # default text
+_FG_CYAN = "\033[36m"  # session/system events
+_FG_GREEN = "\033[32m"  # success, approvals, completions
+_FG_YELLOW = "\033[33m"  # warnings, pending decisions
+_FG_RED = "\033[31m"  # errors, rejections
+_FG_MAGENTA = "\033[35m"  # tool execution
+_FG_BLUE = "\033[34m"  # progress/narration
+_FG_WHITE = "\033[37m"  # default text
 
 # Background accents (for pending decision highlight)
 _BG_YELLOW = "\033[43m"
@@ -59,14 +59,14 @@ _EVENT_COLORS: dict[str, str] = {
 }
 
 # Box-drawing characters
-_H = "\u2500"   # horizontal
-_V = "\u2502"   # vertical
+_H = "\u2500"  # horizontal
+_V = "\u2502"  # vertical
 _TL = "\u250c"  # top-left
 _TR = "\u2510"  # top-right
 _BL = "\u2514"  # bottom-left
 _BR = "\u2518"  # bottom-right
-_T = "\u252c"   # T-down
-_B = "\u2534"   # T-up
+_T = "\u252c"  # T-down
+_B = "\u2534"  # T-up
 _BULLET = "\u2022"
 
 
@@ -260,13 +260,11 @@ class SupervisorUI:
         """Add an event to the timeline and trigger redraw."""
         self._timeline.append(TimelineEntry(timestamp=time.time(), category=category, text=text))
 
-    def add_pending(
-        self, request_id: str, question: str, options: list[str] | None = None
-    ) -> None:
+    def add_pending(self, request_id: str, question: str, options: list[str] | None = None) -> None:
         """Add a pending decision requiring human input."""
-        self._pending.append(PendingDecision(
-            request_id=request_id, question=question, options=options
-        ))
+        self._pending.append(
+            PendingDecision(request_id=request_id, question=question, options=options)
+        )
 
     def resolve_pending(self, request_id: str) -> None:
         """Remove a resolved pending decision."""

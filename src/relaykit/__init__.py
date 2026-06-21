@@ -12,7 +12,12 @@ from relaykit.hooks import AgentHooks
 from relaykit.runner import Runner, RunResult
 from relaykit.session import RealtimeSession
 from relaykit.session_config import SessionConfig
-from relaykit.signals import InterruptMode, OperationalContextPolicy, OperationalSignal, RuntimeSignal
+from relaykit.signals import (
+    InterruptMode,
+    OperationalContextPolicy,
+    OperationalSignal,
+    RuntimeSignal,
+)
 from relaykit.streaming import (
     AudioDelta,
     AudioFrame,

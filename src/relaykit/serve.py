@@ -73,7 +73,9 @@ async def serve(
     """
     resolved_host = host or os.environ.get("RELAYKIT_HOST", "0.0.0.0")
     resolved_port = port or int(os.environ.get("PORT", os.environ.get("RELAYKIT_PORT", "8000")))
-    resolved_max = max_sessions or int(os.environ.get("RELAYKIT_MAX_SESSIONS", str(_DEFAULT_MAX_SESSIONS)))
+    resolved_max = max_sessions or int(
+        os.environ.get("RELAYKIT_MAX_SESSIONS", str(_DEFAULT_MAX_SESSIONS))
+    )
     resolved_drain = drain_timeout if drain_timeout is not None else _DEFAULT_DRAIN_TIMEOUT
     try:
         import websockets

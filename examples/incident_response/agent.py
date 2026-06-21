@@ -37,6 +37,7 @@ from tools import (
     toggle_feature_flag,
 )
 
+
 class IncidentState(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
     alert: str
@@ -100,6 +101,7 @@ EXECUTION_PROMPT = SystemMessage(
         "Call the necessary tools to implement the mitigation, then confirm completion."
     )
 )
+
 
 def investigate(state: IncidentState) -> dict[str, Any]:
     """Invoke the LLM with investigation tools to gather evidence."""

@@ -53,14 +53,17 @@ async def handle_supervision(ws: Any, session_id: str) -> None:
     cancellation_token = session.cancellation_token
 
     pending = _get_pending_approvals(input_manager)
-    await _send(ws, {
-        "type": "connected",
-        "session_id": session_id,
-        "model": session.agent.model,
-        "state": "ended" if not session.is_connected else "running",
-        "pending_approvals": pending,
-        "replay_from": None,
-    })
+    await _send(
+        ws,
+        {
+            "type": "connected",
+            "session_id": session_id,
+            "model": session.agent.model,
+            "state": "ended" if not session.is_connected else "running",
+            "pending_approvals": pending,
+            "replay_from": None,
+        },
+    )
 
     try:
         subscribe_msg = await asyncio.wait_for(ws.recv(), timeout=_SUBSCRIBE_TIMEOUT)
@@ -70,7 +73,15 @@ async def handle_supervision(ws: Any, session_id: str) -> None:
 
     cmd = _parse(subscribe_msg)
     if cmd is None or cmd.get("type") != "subscribe":
-        await _send(ws, {"type": "error", "cmd_id": "", "code": "invalid_command", "message": "First message must be subscribe"})
+        await _send(
+            ws,
+            {
+                "type": "error",
+                "cmd_id": "",
+                "code": "invalid_command",
+                "message": "First message must be subscribe",
+            },
+        )
         await ws.close(4408, "subscribe_timeout")
         return
 
@@ -85,9 +96,17 @@ async def handle_supervision(ws: Any, session_id: str) -> None:
                 found_idx = i
                 break
         if found_idx is None:
-            await _send(ws, {"type": "error", "cmd_id": cmd_id, "code": "replay_gap", "message": "Event not in history buffer"})
+            await _send(
+                ws,
+                {
+                    "type": "error",
+                    "cmd_id": cmd_id,
+                    "code": "replay_gap",
+                    "message": "Event not in history buffer",
+                },
+            )
             return
-        for ev in history[found_idx + 1:]:
+        for ev in history[found_idx + 1 :]:
             await _send(ws, _event_to_wire(ev))
 
     await _send(ws, {"type": "ack", "cmd_id": cmd_id, "detail": {}})
@@ -136,7 +155,14 @@ async def _receiver_loop(
     async for raw in ws:
         cmd = _parse(raw)
         if cmd is None:
-            send_queue.put_nowait({"type": "error", "cmd_id": "", "code": "invalid_command", "message": "Malformed JSON"})
+            send_queue.put_nowait(
+                {
+                    "type": "error",
+                    "cmd_id": "",
+                    "code": "invalid_command",
+                    "message": "Malformed JSON",
+                }
+            )
             continue
 
         cmd_type = cmd.get("type", "")
@@ -149,7 +175,14 @@ async def _receiver_loop(
         elif cmd_type == "inspect":
             _handle_inspect(cmd_id, session, input_manager, cancellation_token, send_queue)
         else:
-            send_queue.put_nowait({"type": "error", "cmd_id": cmd_id, "code": "invalid_command", "message": f"Unknown type: {cmd_type}"})
+            send_queue.put_nowait(
+                {
+                    "type": "error",
+                    "cmd_id": cmd_id,
+                    "code": "invalid_command",
+                    "message": f"Unknown type: {cmd_type}",
+                }
+            )
 
 
 def _handle_resolve(
@@ -159,7 +192,14 @@ def _handle_resolve(
     answer = cmd.get("answer", "")
 
     if not input_manager:
-        queue.put_nowait({"type": "error", "cmd_id": cmd_id, "code": "session_ended", "message": "No input manager"})
+        queue.put_nowait(
+            {
+                "type": "error",
+                "cmd_id": cmd_id,
+                "code": "session_ended",
+                "message": "No input manager",
+            }
+        )
         return
 
     from relaykit.supervision.hitl import InputStatus
@@ -167,14 +207,28 @@ def _handle_resolve(
     try:
         status = input_manager.get_status(request_id)
     except KeyError:
-        queue.put_nowait({"type": "error", "cmd_id": cmd_id, "code": "unknown_request", "message": f"No pending request: {request_id}"})
+        queue.put_nowait(
+            {
+                "type": "error",
+                "cmd_id": cmd_id,
+                "code": "unknown_request",
+                "message": f"No pending request: {request_id}",
+            }
+        )
         return
 
     if status == InputStatus.ANSWERED:
         queue.put_nowait({"type": "ack", "cmd_id": cmd_id, "detail": {"already_resolved": True}})
         return
     if status is None:
-        queue.put_nowait({"type": "error", "cmd_id": cmd_id, "code": "unknown_request", "message": f"No pending request: {request_id}"})
+        queue.put_nowait(
+            {
+                "type": "error",
+                "cmd_id": cmd_id,
+                "code": "unknown_request",
+                "message": f"No pending request: {request_id}",
+            }
+        )
         return
 
     try:
@@ -192,7 +246,14 @@ def _handle_cancel(
     reason = cmd.get("reason", "supervisor_cancelled")
 
     if cancellation_token is None:
-        queue.put_nowait({"type": "error", "cmd_id": cmd_id, "code": "session_ended", "message": "No cancellation token"})
+        queue.put_nowait(
+            {
+                "type": "error",
+                "cmd_id": cmd_id,
+                "code": "session_ended",
+                "message": "No cancellation token",
+            }
+        )
         return
 
     if cancellation_token.is_cancelled:
@@ -204,7 +265,10 @@ def _handle_cancel(
 
 
 def _handle_inspect(
-    cmd_id: str, session: Any, input_manager: Any, cancellation_token: Any,
+    cmd_id: str,
+    session: Any,
+    input_manager: Any,
+    cancellation_token: Any,
     queue: asyncio.Queue[dict[str, Any]],
 ) -> None:
     detail = {
