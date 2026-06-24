@@ -1,0 +1,4 @@
+## 2025-02-28 - Missing Security Headers in Web UI
+**Vulnerability:** The built-in WebSocket UI server in `src/livelink/serve.py` served HTML and JSON responses without standard HTTP security headers (CSP, X-Frame-Options, X-Content-Type-Options). This exposed users interacting with the agent interface to Clickjacking, XSS escalation, and MIME sniffing attacks.
+**Learning:** Even internal or development-focused web UIs bundled with Python libraries need baseline security headers. The `websockets` library's `process_request` hook is the correct place to inject these headers before the WebSocket upgrade completes.
+**Prevention:** Always verify that HTTP responses, especially those serving HTML or JSON, include a Content-Security-Policy (CSP), X-Frame-Options, and X-Content-Type-Options. Use a dictionary of base headers and merge them into the `websockets.datastructures.Headers` object.
