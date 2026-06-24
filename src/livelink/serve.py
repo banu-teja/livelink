@@ -130,9 +130,15 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        base_headers = {
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
+            "Content-Security-Policy": "default-src 'self'; connect-src 'self' ws: wss:; media-src 'self' blob:; script-src 'unsafe-inline'; style-src 'unsafe-inline'",
+        }
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
-                {"Content-Type": "text/html; charset=utf-8"}
+                {"Content-Type": "text/html; charset=utf-8", **base_headers}
             )
             if cors:
                 headers["Access-Control-Allow-Origin"] = "*"
@@ -151,7 +157,7 @@ async def serve(
             return websockets.http11.Response(
                 code,
                 "OK" if code == 200 else "Service Unavailable",
-                websockets.datastructures.Headers({"Content-Type": "application/json"}),
+                websockets.datastructures.Headers({"Content-Type": "application/json", **base_headers}),
                 body.encode(),
             )
         return None
