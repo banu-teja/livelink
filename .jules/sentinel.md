@@ -1,0 +1,4 @@
+## 2025-05-18 - [Add Security Headers to Serve Module]
+**Vulnerability:** Missing standard HTTP security headers (CSP, X-Frame-Options, X-Content-Type-Options) in the `agent.serve()` HTTP responses for the UI and health endpoints.
+**Learning:** The simple websocket server provided out of the box did not have security headers defined for the fallback HTTP UI. While this is primarily for local dev and examples, users might run it exposed in production without a reverse proxy.
+**Prevention:** Always ensure standard security headers are included out of the box when exposing a built-in server or HTTP endpoint, even for UI or diagnostic purposes.
