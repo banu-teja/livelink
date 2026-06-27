@@ -91,6 +91,21 @@ async def serve(
     from livelink.supervise import handle_supervision
     from livelink.transport import WebSocketTransport
 
+    ws_origins: list[str | None] | None = None
+    if not cors:
+        ws_origins = [
+            None,
+            f"http://{resolved_host}:{resolved_port}",
+            f"https://{resolved_host}:{resolved_port}",
+        ]
+        if resolved_host in ("0.0.0.0", "::"):
+            ws_origins.extend([
+                f"http://localhost:{resolved_port}",
+                f"https://localhost:{resolved_port}",
+                f"http://127.0.0.1:{resolved_port}",
+                f"https://127.0.0.1:{resolved_port}",
+            ])
+
     state = _ServerState(max_sessions=resolved_max, drain_timeout=resolved_drain)
     html_content = _load_ui(ui, ui_path, resolved_host, resolved_port)
 
@@ -148,10 +163,13 @@ async def serve(
                     "uptime_seconds": round(time.monotonic() - state.start_time, 2),
                 }
             )
+            headers = websockets.datastructures.Headers({"Content-Type": "application/json"})
+            if cors:
+                headers["Access-Control-Allow-Origin"] = "*"
             return websockets.http11.Response(
                 code,
                 "OK" if code == 200 else "Service Unavailable",
-                websockets.datastructures.Headers({"Content-Type": "application/json"}),
+                headers,
                 body.encode(),
             )
         return None
@@ -164,6 +182,7 @@ async def serve(
         handle_connection,
         resolved_host,
         resolved_port,
+        origins=ws_origins,
         process_request=process_request,
     ):
         await state.shutdown_event.wait()
