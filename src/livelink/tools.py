@@ -180,8 +180,10 @@ class ToolRegistry:
 
             output = json.dumps(result) if not isinstance(result, str) else result
         except Exception as exc:
-            logger.warning("Tool %s raised: %s", call.name, exc)
-            output = json.dumps({"error": str(exc)})
+            # Log the full exception internally, but do not leak the exception details to the LLM/client
+            # to avoid exposing potentially sensitive internal state or stack traces.
+            logger.warning("Tool %s raised an exception: %s", call.name, type(exc).__name__, exc_info=True)
+            output = json.dumps({"error": "An error occurred during tool execution."})
             return ToolResult(call_id=call.id, output=output, is_error=True)
 
         return ToolResult(call_id=call.id, output=output, is_error=False)
