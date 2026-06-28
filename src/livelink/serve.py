@@ -132,7 +132,13 @@ async def serve(
     def process_request(connection: Any, request: Any) -> Any:
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
-                {"Content-Type": "text/html; charset=utf-8"}
+                {
+                    "Content-Type": "text/html; charset=utf-8",
+                    "Content-Security-Policy": "default-src 'self'; connect-src 'self' ws: wss:; style-src 'unsafe-inline'; script-src 'unsafe-inline'",
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Frame-Options": "DENY",
+                    "Referrer-Policy": "strict-origin-when-cross-origin",
+                }
             )
             if cors:
                 headers["Access-Control-Allow-Origin"] = "*"
