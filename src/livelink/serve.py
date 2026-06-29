@@ -112,7 +112,26 @@ async def serve(
         path = path or ""
 
         if path.startswith("/supervise/"):
-            session_id = path.removeprefix("/supervise/").strip("/")
+            import urllib.parse
+            parsed_url = urllib.parse.urlparse(path)
+            session_id = parsed_url.path.removeprefix("/supervise/").strip("/")
+
+            # Authentication check for sensitive supervision endpoint
+            expected_token = os.environ.get("LIVELINK_SUPERVISE_TOKEN")
+            if expected_token:
+                query_params = urllib.parse.parse_qs(parsed_url.query)
+                token = query_params.get("token", [None])[0]
+                auth_header = connection.request.headers.get("Authorization", "")
+                header_token = auth_header.replace("Bearer ", "").strip()
+
+                import hmac
+
+                provided_token = token or header_token
+                if not provided_token or not hmac.compare_digest(provided_token, expected_token):
+                    logger.warning("Unauthorized access attempt to supervise endpoint for session: %s", session_id)
+                    await connection.close(4001, "Unauthorized")
+                    return
+
             await handle_supervision(connection, session_id)
             return
 
