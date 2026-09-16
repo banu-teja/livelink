@@ -13,7 +13,7 @@ import os
 import signal
 import time
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from livelink.agent import LiveAgent
@@ -26,12 +26,12 @@ _DEFAULT_MAX_SESSIONS: int = 100
 
 class _ServerState:
     __slots__ = (
-        "shutdown_event",
         "active_sessions",
-        "start_time",
+        "drain_timeout",
         "draining",
         "max_sessions",
-        "drain_timeout",
+        "shutdown_event",
+        "start_time",
     )
 
     def __init__(self, *, max_sessions: int, drain_timeout: float) -> None:
@@ -79,8 +79,8 @@ async def serve(
     resolved_drain = drain_timeout if drain_timeout is not None else _DEFAULT_DRAIN_TIMEOUT
     try:
         import websockets
-        import websockets.http11
         import websockets.datastructures
+        import websockets.http11
         from websockets.asyncio.server import serve as ws_serve
     except ImportError:
         raise ImportError(
@@ -130,9 +130,21 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        origin = request.headers.get("Origin")
+        if not cors and origin is not None:
+            allowed = f"http://{resolved_host}:{resolved_port}"
+            is_localhost = origin == f"http://localhost:{resolved_port}" or origin == f"http://127.0.0.1:{resolved_port}"
+            if origin != allowed and not (resolved_host in ("0.0.0.0", "127.0.0.1", "localhost") and is_localhost):
+                return websockets.http11.Response(403, "Forbidden", websockets.datastructures.Headers(), b"Forbidden")
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
-                {"Content-Type": "text/html; charset=utf-8"}
+                {
+                    "Content-Type": "text/html; charset=utf-8",
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Frame-Options": "DENY",
+                    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: ws: wss:;",
+                }
             )
             if cors:
                 headers["Access-Control-Allow-Origin"] = "*"
@@ -148,10 +160,18 @@ async def serve(
                     "uptime_seconds": round(time.monotonic() - state.start_time, 2),
                 }
             )
+            headers = websockets.datastructures.Headers(
+                {
+                    "Content-Type": "application/json",
+                    "X-Content-Type-Options": "nosniff",
+                }
+            )
+            if cors:
+                headers["Access-Control-Allow-Origin"] = "*"
             return websockets.http11.Response(
                 code,
                 "OK" if code == 200 else "Service Unavailable",
-                websockets.datastructures.Headers({"Content-Type": "application/json"}),
+                headers,
                 body.encode(),
             )
         return None
