@@ -51,7 +51,7 @@ async def serve(
     ui: bool = True,
     ui_path: str | Path | None = None,
     deps: Any = None,
-    cors: bool = False,
+    cors: bool | str | list[str] = False,
     max_sessions: int | None = None,
     drain_timeout: float | None = None,
 ) -> None:
@@ -67,7 +67,7 @@ async def serve(
         ui: Serve built-in audio client at /.
         ui_path: Path to custom static HTML file to serve instead of built-in UI.
         deps: Dependency injection object passed to tools via ToolContext.
-        cors: Enable CORS headers for cross-origin requests.
+        cors: Enable CORS headers. Can be a boolean, a specific origin string, or a list of allowed origins.
         max_sessions: Maximum concurrent sessions. Defaults to LIVELINK_MAX_SESSIONS or 100.
         drain_timeout: Seconds to wait for sessions to finish on shutdown. Defaults to 300.
     """
@@ -135,7 +135,14 @@ async def serve(
                 {"Content-Type": "text/html; charset=utf-8"}
             )
             if cors:
-                headers["Access-Control-Allow-Origin"] = "*"
+                if isinstance(cors, str):
+                    headers["Access-Control-Allow-Origin"] = cors
+                elif isinstance(cors, list):
+                    origin = request.headers.get("Origin")
+                    if origin and origin in cors:
+                        headers["Access-Control-Allow-Origin"] = origin
+                else:
+                    headers["Access-Control-Allow-Origin"] = "*"
             return websockets.http11.Response(200, "OK", headers, html_content.encode())
         if request.path == "/health":
             status = "draining" if state.draining else "ok"
