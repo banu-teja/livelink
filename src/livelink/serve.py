@@ -154,6 +154,27 @@ async def serve(
                 websockets.datastructures.Headers({"Content-Type": "application/json"}),
                 body.encode(),
             )
+
+        # Protect against Cross-Site WebSocket Hijacking (CSWSH)
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin is not None:
+                import urllib.parse
+
+                try:
+                    parsed_origin = urllib.parse.urlparse(origin)
+                    origin_host = parsed_origin.netloc
+                except Exception:
+                    origin_host = ""
+
+                req_host = request.headers.get("Host")
+                if not req_host or origin_host != req_host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Cross-Site WebSocket Hijacking (CSWSH) protection enabled.",
+                    )
         return None
 
     url = f"http://{resolved_host}:{resolved_port}"
