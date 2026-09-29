@@ -1,0 +1,4 @@
+## 2025-02-20 - Cross-Site WebSocket Hijacking (CSWSH) in serve endpoint
+**Vulnerability:** The built-in WebSocket server (`agent.serve()`) did not validate the `Origin` header by default. A malicious website could open a WebSocket connection to the local agent server and hijack the session (Cross-Site WebSocket Hijacking - CSWSH).
+**Learning:** WebSockets do not adhere to the Same-Origin Policy by default. When wrapping a WebSocket server in a high-level API intended for local or targeted deployments, origin validation must be explicitly implemented, especially when a `cors` parameter is exposed but not strictly enforced by default for WebSocket handshakes.
+**Prevention:** Always validate the `Origin` header against the `Host` header (or a list of allowed origins) during the WebSocket handshake (`process_request` in `websockets`), returning an HTTP 403 response if they don't match, unless CORS is explicitly enabled by the user.
