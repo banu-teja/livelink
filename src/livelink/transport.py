@@ -176,7 +176,11 @@ class WebSocketTransport:
             elif msg_type == "audio" and "data" in message:
                 import base64
 
-                audio_bytes = base64.b64decode(message["data"])
+                try:
+                    audio_bytes = base64.b64decode(message["data"])
+                except Exception:
+                    return None
+
                 return AudioInput(
                     data=audio_bytes,
                     sample_rate=message.get("sample_rate", self._input_sample_rate),
