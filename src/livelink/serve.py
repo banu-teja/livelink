@@ -51,7 +51,7 @@ async def serve(
     ui: bool = True,
     ui_path: str | Path | None = None,
     deps: Any = None,
-    cors: bool = False,
+    cors: bool | str | list[str] = False,
     max_sessions: int | None = None,
     drain_timeout: float | None = None,
 ) -> None:
@@ -130,13 +130,41 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        origin = request.headers.get("Origin")
+        is_allowed = True
+
+        # Security: Prevent Cross-Site WebSocket Hijacking & enforce CORS
+        if origin is not None:
+            is_allowed = False
+            host_header = request.headers.get("Host")
+
+            # 1. Allow Same-Origin
+            if host_header and origin.endswith(f"://{host_header}"):
+                is_allowed = True
+
+            # 2. Allow explicitly configured CORS origins
+            if not is_allowed and cors:
+                if isinstance(cors, bool) and cors:
+                    is_allowed = True
+                elif isinstance(cors, str) and (cors == "*" or origin == cors):
+                    is_allowed = True
+                elif isinstance(cors, list) and origin in cors:
+                    is_allowed = True
+
+        if not is_allowed:
+            return websockets.http11.Response(
+                403, "Forbidden", websockets.datastructures.Headers(), b"Forbidden\n"
+            )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
             )
-            if cors:
-                headers["Access-Control-Allow-Origin"] = "*"
+            if cors and origin and is_allowed:
+                # If cors allows it, we echo back the origin, or * if it's literally a * wildcard.
+                headers["Access-Control-Allow-Origin"] = "*" if cors is True or cors == "*" else origin
             return websockets.http11.Response(200, "OK", headers, html_content.encode())
+
         if request.path == "/health":
             status = "draining" if state.draining else "ok"
             code = 503 if state.draining else 200
@@ -148,10 +176,13 @@ async def serve(
                     "uptime_seconds": round(time.monotonic() - state.start_time, 2),
                 }
             )
+            headers = websockets.datastructures.Headers({"Content-Type": "application/json"})
+            if cors and origin and is_allowed:
+                headers["Access-Control-Allow-Origin"] = "*" if cors is True or cors == "*" else origin
             return websockets.http11.Response(
                 code,
                 "OK" if code == 200 else "Service Unavailable",
-                websockets.datastructures.Headers({"Content-Type": "application/json"}),
+                headers,
                 body.encode(),
             )
         return None

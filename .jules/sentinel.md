@@ -1,0 +1,4 @@
+## 2024-10-02 - Sentinel: Fix overly permissive CORS and prevent CSWSH
+**Vulnerability:** The application was vulnerable to Cross-Site WebSocket Hijacking (CSWSH). The default WebSocket implementation did not validate the `Origin` header during the handshake, allowing malicious websites to connect to the agent (e.g. running locally on `0.0.0.0:8000`) and interact with it.
+**Learning:** `websockets` library does not validate origins by default unless `origins` is provided or it is checked manually in `process_request`. The static `origins` list can break Same-Origin access over IP addresses if `0.0.0.0` is used, so dynamic `Origin` vs `Host` validation in `process_request` is much safer and more robust.
+**Prevention:** Always implement a dynamic `Origin` check against the `Host` header for WebSockets that don't have built-in CSRF/CSWSH protections, returning 403 Forbidden on mismatch. Allow configurable CORS lists for cross-origin access.
