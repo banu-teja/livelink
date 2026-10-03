@@ -130,6 +130,20 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        origin = request.headers.get("Origin")
+        if not cors and origin:
+            from urllib.parse import urlparse
+
+            parsed_origin = urlparse(origin)
+            allowed = {resolved_host, "localhost", "127.0.0.1"}
+            if parsed_origin.hostname not in allowed:
+                return websockets.http11.Response(
+                    403,
+                    "Forbidden",
+                    websockets.datastructures.Headers(),
+                    b"Cross-origin connections are forbidden.",
+                )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
