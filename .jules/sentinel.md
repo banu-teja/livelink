@@ -1,0 +1,4 @@
+## 2023-10-27 - [High] Cross-Site WebSocket Hijacking in serve.py
+**Vulnerability:** The default WebSocket server endpoint did not validate the `Origin` header when CORS was disabled, making it vulnerable to Cross-Site WebSocket Hijacking (CSWSH). An attacker could initiate a WebSocket connection from a malicious site and hijack the authenticated session if the user had credentials for the server.
+**Learning:** WebSocket connections aren't inherently bound by the Same-Origin Policy for the initial HTTP handshake. Without explicit Origin checking on the server side, cross-site connections are freely allowed by browsers.
+**Prevention:** Always validate the `Origin` header against the expected `Host` or an allowed list during the HTTP upgrade request for WebSockets, unless CORS is intentionally fully permissive.
