@@ -130,6 +130,17 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin:
+                from urllib.parse import urlparse
+                parsed = urlparse(origin)
+                host = request.headers.get("Host", "")
+                if parsed.netloc != host or origin == "null":
+                    return websockets.http11.Response(
+                        403, "Forbidden", websockets.datastructures.Headers(), b"Forbidden"
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
