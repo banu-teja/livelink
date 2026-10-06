@@ -1,0 +1,4 @@
+## 2026-10-06 - [Cross-Site WebSocket Hijacking Protection]
+**Vulnerability:** The custom WebSocket server implementation (`process_request` in `serve.py`) was not validating the `Origin` header when `cors` was set to False. This left the server vulnerable to Cross-Site WebSocket Hijacking (CSWSH), allowing malicious websites to connect to a user's local instance.
+**Learning:** When manually handling the WebSocket HTTP handshake (e.g. returning responses for health checks and UI) and using the `websockets` library with a custom `process_request` hook, default Origin checks might be bypassed or missing.
+**Prevention:** Always validate the `Origin` header against the expected `Host` during the `process_request` phase before accepting the connection, and block mismatching or "null" origins when CORS is not explicitly enabled.
