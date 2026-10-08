@@ -1,0 +1,4 @@
+## 2024-10-08 - CSWSH (Cross-Site WebSocket Hijacking) in websockets runtime
+**Vulnerability:** The websockets custom HTTP request handler in `process_request` inside `serve.py` doesn't validate the `Origin` header against the `Host` header. This allows cross-site websocket hijacking where a malicious site can connect to the local websocket server.
+**Learning:** `websockets.serve` handles connections but leaves CSWSH protection to the developer when you override `process_request` (or even by default if not strictly configured). Since this app uses websockets for local runtime control/interaction, CSWSH allows an attacker to open a WebSocket connection via a victim's browser.
+**Prevention:** In `process_request`, explicitly check the `Origin` header from `request.headers`. If `Origin` is present and its netloc doesn't match the `Host` header, reject the connection with a 403 response.
