@@ -1,0 +1,4 @@
+## 2025-02-23 - Prevent Cross-Site WebSocket Hijacking (CSWSH)
+**Vulnerability:** The custom WebSocket implementation using the `websockets` library processed HTTP upgrade requests directly but failed to validate the `Origin` header against the `Host` header. This allowed malicious sites to initiate WebSocket connections to `localhost:8000` on behalf of an authenticated user (Cross-Site WebSocket Hijacking).
+**Learning:** In standard HTTP endpoints, CORS rules apply and browsers enforce them for standard API calls. However, WebSockets do not have Same-Origin Policy (SOP) by default. The server needs to explicitly perform CSRF-style validation for WebSockets by verifying that the `Origin` header exactly matches the `Host`.
+**Prevention:** Implement validation in the HTTP request interception phase (e.g., in `process_request` hook before upgrade) to ensure the parsed `netloc` of the `Origin` header securely matches the `Host` header when `cors` is disabled.
