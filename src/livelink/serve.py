@@ -12,8 +12,9 @@ import logging
 import os
 import signal
 import time
+import urllib.parse
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from livelink.agent import LiveAgent
@@ -26,12 +27,12 @@ _DEFAULT_MAX_SESSIONS: int = 100
 
 class _ServerState:
     __slots__ = (
-        "shutdown_event",
         "active_sessions",
-        "start_time",
+        "drain_timeout",
         "draining",
         "max_sessions",
-        "drain_timeout",
+        "shutdown_event",
+        "start_time",
     )
 
     def __init__(self, *, max_sessions: int, drain_timeout: float) -> None:
@@ -79,8 +80,8 @@ async def serve(
     resolved_drain = drain_timeout if drain_timeout is not None else _DEFAULT_DRAIN_TIMEOUT
     try:
         import websockets
-        import websockets.http11
         import websockets.datastructures
+        import websockets.http11
         from websockets.asyncio.server import serve as ws_serve
     except ImportError:
         raise ImportError(
@@ -130,6 +131,19 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            host = request.headers.get("Host")
+            if origin is not None and host is not None:
+                parsed_origin = urllib.parse.urlparse(origin)
+                if parsed_origin.netloc != host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Cross-Site WebSocket Hijacking blocked",
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
