@@ -12,6 +12,7 @@ import logging
 import os
 import signal
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
@@ -130,6 +131,19 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            host = request.headers.get("Host")
+            if origin is not None:
+                parsed_origin = urllib.parse.urlparse(origin)
+                if not parsed_origin.netloc or parsed_origin.netloc != host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Cross-Origin WebSocket Request Forbidden",
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}

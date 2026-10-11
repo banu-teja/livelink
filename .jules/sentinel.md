@@ -1,0 +1,4 @@
+## 2026-10-11 - [Missing CSWSH Protection in Custom websockets Server]
+**Vulnerability:** The application used a custom `process_request` hook in the `websockets` library without validating the `Origin` header against the `Host` header, making it vulnerable to Cross-Site WebSocket Hijacking (CSWSH).
+**Learning:** When explicitly intercepting the WebSocket HTTP handshake (`process_request`) to handle auxiliary routes (like `/health` or UI serving), the library defers some security checks to the application logic. The missing validation allows unauthorized domains to instantiate WebSocket connections on behalf of a user.
+**Prevention:** Always implement `Origin` to `Host` verification in custom WebSocket handshake handlers, specifically when Cross-Origin Resource Sharing (CORS) is disabled. Return HTTP 403 when they don't match.
