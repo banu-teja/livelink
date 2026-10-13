@@ -14,6 +14,7 @@ import signal
 import time
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
+from urllib.parse import urlparse
 
 if TYPE_CHECKING:
     from livelink.agent import LiveAgent
@@ -130,6 +131,24 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            host = request.headers.get("Host")
+            if origin and host:
+                parsed_origin = urlparse(origin)
+                # Ignore port mismatches or scheme mismatches for now, focus on netloc
+                # urlparse("http://evil.com").netloc -> "evil.com"
+                # For exact CSWSH we want to match netloc to host, but often Host has port
+                # Host header: localhost:8000
+                # Origin: http://localhost:8000 -> netloc: localhost:8000
+                if parsed_origin.netloc != host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers(),
+                        b"Cross-Site WebSocket Hijacking prevented\n",
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}

@@ -1,0 +1,4 @@
+## 2025-02-23 - Cross-Site WebSocket Hijacking (CSWSH) Fix
+**Vulnerability:** The custom WebSocket implementation using the `websockets` library via `process_request` in `serve.py` did not explicitly validate the `Origin` header against the `Host` header. This allowed malicious websites to connect to the agent runtime on a user's behalf if they visited a malicious page.
+**Learning:** By default, standard WebSocket servers may not enforce `Origin` validation, which is critical for browser security models because WebSockets aren't protected by CORS in the traditional HTTP sense.
+**Prevention:** Always validate the `Origin` header against the `Host` header during the HTTP upgrade request for WebSockets unless explicitly configured for Cross-Origin requests. Using `urlparse` on the `Origin` header and checking `parsed_origin.netloc != host` is an effective strategy. Ensure non-browser programmatic clients (that omit the `Origin` header) are not inadvertently blocked.
