@@ -12,6 +12,7 @@ import logging
 import os
 import signal
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
@@ -130,6 +131,19 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            host = request.headers.get("X-Forwarded-Host", request.headers.get("Host"))
+            if origin and host:
+                parsed_origin = urllib.parse.urlparse(origin).netloc
+                if parsed_origin != host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"CSWSH blocked",
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
