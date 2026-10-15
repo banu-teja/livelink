@@ -1,0 +1,4 @@
+## 2024-10-15 - CSWSH (Cross-Site WebSocket Hijacking) in Custom WebSocket Implementation
+**Vulnerability:** The custom WebSocket server implementation (using `websockets`) in `serve.py` did not validate the `Origin` header during the HTTP handshake for WebSocket connections. This allowed malicious websites to connect to a user's local or exposed instance and hijack the WebSocket session.
+**Learning:** When manually managing the `process_request` hook in the `websockets` library (or similar low-level WebSocket libraries) rather than using higher-level frameworks like FastAPI or Starlette, `Origin` validation is completely unhandled by default. Developers must explicitly write logic to check `Origin` against `Host` or `X-Forwarded-Host`.
+**Prevention:** Always validate the `Origin` header against `Host` or `X-Forwarded-Host` during WebSocket handshakes if CORS is disabled, especially when exposing local endpoints.
