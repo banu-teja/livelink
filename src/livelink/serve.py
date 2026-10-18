@@ -154,6 +154,28 @@ async def serve(
                 websockets.datastructures.Headers({"Content-Type": "application/json"}),
                 body.encode(),
             )
+
+        # 🛡️ Sentinel: Protect against Cross-Site WebSocket Hijacking (CSWSH)
+        # Validate that the Origin matches the expected Host when CORS is false
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin:
+                from urllib.parse import urlparse
+                origin_host = urlparse(origin).netloc
+                host_header = request.headers.get("X-Forwarded-Host") or request.headers.get("Host")
+                if host_header and origin_host != host_header:
+                    logger.warning(
+                        "CSWSH protection triggered: Origin '%s' does not match Host '%s'",
+                        origin_host,
+                        host_header,
+                    )
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Forbidden: Origin mismatch",
+                    )
+
         return None
 
     url = f"http://{resolved_host}:{resolved_port}"
