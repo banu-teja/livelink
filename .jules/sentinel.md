@@ -1,0 +1,4 @@
+## 2024-10-20 - Cross-Site WebSocket Hijacking (CSWSH) in serve.py
+**Vulnerability:** The custom WebSocket server implementation in `src/livelink/serve.py` processed HTTP handshakes but failed to validate the `Origin` header against the expected host. This allowed malicious websites to initiate WebSocket connections to the local server via a user's browser (Cross-Site WebSocket Hijacking).
+**Learning:** When using custom connection handlers (like `websockets`' `process_request`), standard protections are bypassed. The `Origin` header must be explicitly validated against `X-Forwarded-Host` or `Host` when CORS is disabled.
+**Prevention:** Always validate `Origin` during custom WebSocket handshakes, especially when relying on browser-based auth or local context. Ensure the expected Host matches the requesting Origin unless explicitly allowed via CORS configuration.
