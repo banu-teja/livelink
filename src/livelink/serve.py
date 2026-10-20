@@ -154,6 +154,21 @@ async def serve(
                 websockets.datastructures.Headers({"Content-Type": "application/json"}),
                 body.encode(),
             )
+
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin:
+                import urllib.parse
+
+                parsed_origin = urllib.parse.urlparse(origin)
+                host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host")
+                if parsed_origin.netloc and host and parsed_origin.netloc != host:
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Cross-Site WebSocket Hijacking blocked",
+                    )
         return None
 
     url = f"http://{resolved_host}:{resolved_port}"
