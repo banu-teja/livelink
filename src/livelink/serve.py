@@ -130,6 +130,22 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            import urllib.parse
+
+            origin = request.headers.get("Origin")
+            if origin and origin != "null":
+                parsed_origin = urllib.parse.urlparse(origin).netloc
+                host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host")
+                if host and parsed_origin != host:
+                    logger.warning("CSWSH blocked: Origin %r does not match Host %r", origin, host)
+                    return websockets.http11.Response(
+                        403,
+                        "Forbidden",
+                        websockets.datastructures.Headers({"Content-Type": "text/plain"}),
+                        b"Forbidden: Origin mismatch",
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
