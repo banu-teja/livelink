@@ -1,0 +1,4 @@
+## 2024-05-24 - Cross-Site WebSocket Hijacking (CSWSH) in Custom HTTP Handlers
+**Vulnerability:** The custom `process_request` HTTP handshake handler for WebSockets accepted all origins by default, making the application vulnerable to Cross-Site WebSocket Hijacking (CSWSH).
+**Learning:** Overriding the default WebSocket HTTP handshake in Python's `websockets` library (e.g., to serve a health check or static UI) bypasses its built-in origin validation unless explicitly re-implemented. The framework trusts the `process_request` hook completely.
+**Prevention:** Always validate the `Origin` header against the expected `Host` (or `X-Forwarded-Host` if behind a proxy) in custom WebSocket handshake handlers, especially when handling authenticated or state-modifying connections, unless CORS is explicitly enabled.
