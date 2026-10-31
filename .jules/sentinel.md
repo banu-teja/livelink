@@ -1,0 +1,4 @@
+## 2025-02-18 - [CSWSH Fix in serve.py]
+**Vulnerability:** A Cross-Site WebSocket Hijacking (CSWSH) vulnerability was present in the `serve.py` module where the custom WebSocket runtime overriding `process_request` didn't explicitly check the `Origin` header unless natively handled by `ws_serve(origins=...)`.
+**Learning:** Overriding `process_request` in the `websockets` library disables standard Origin validation. When allowing WebSocket upgrades manually or processing HTTP handshakes natively, the developer must re-implement security logic.
+**Prevention:** Always validate the `Origin` header against `X-Forwarded-Host` or `Host` when `cors` is disabled (or strictly matching allowed origins) during custom WebSocket handshakes. Additionally, use `urllib.parse.urlparse(origin).netloc` rather than manually constructing with `.hostname` + `.port` to properly handle IPv6 addresses and simplify logic.
