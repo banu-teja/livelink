@@ -130,6 +130,35 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        # Let websockets handle websocket upgrade if path is for WS
+        if request.headers.get("Upgrade", "").lower() == "websocket":
+            if not cors:
+                origin = request.headers.get("Origin")
+                if origin:
+                    try:
+                        import urllib.parse
+                        parsed_origin = urllib.parse.urlparse(origin)
+                        origin_host = parsed_origin.hostname
+                        # urllib.parse.urlparse drops brackets for IPv6
+                        if origin_host and ":" in origin_host and not origin_host.startswith("["):
+                            origin_host = f"[{origin_host}]"
+
+                        target_host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host")
+
+                        if target_host:
+                            target_host_name = target_host.split(":")[0] if not target_host.startswith("[") else target_host.rsplit("]", 1)[0] + "]"
+                            if origin_host != target_host_name:
+                                logger.warning("Rejected cross-origin WebSocket request from %s", origin_host)
+                                return websockets.http11.Response(
+                                    403, "Forbidden", websockets.datastructures.Headers(), b"Cross-Site WebSocket Hijacking blocked"
+                                )
+                    except Exception as exc:
+                        logger.warning("Rejected WebSocket request due to Origin parsing error: %s", exc)
+                        return websockets.http11.Response(
+                            403, "Forbidden", websockets.datastructures.Headers(), b"Invalid Origin"
+                        )
+            return None
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
