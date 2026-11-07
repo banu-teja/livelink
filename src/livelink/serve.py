@@ -12,8 +12,9 @@ import logging
 import os
 import signal
 import time
+import urllib.parse
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from livelink.agent import LiveAgent
@@ -130,6 +131,35 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin is not None:
+                host_header = request.headers.get("X-Forwarded-Host") or request.headers.get("Host")
+                if not host_header:
+                    return websockets.http11.Response(
+                        403, "Forbidden", websockets.datastructures.Headers(), b"Missing Host header"
+                    )
+
+                try:
+                    parsed_origin = urllib.parse.urlparse(origin)
+                    origin_hostname = parsed_origin.hostname
+                    if origin_hostname and ":" in origin_hostname and not origin_hostname.startswith("["):
+                        origin_hostname = f"[{origin_hostname}]"
+
+                    parsed_host = urllib.parse.urlparse(f"http://{host_header}")
+                    host_hostname = parsed_host.hostname
+                    if host_hostname and ":" in host_hostname and not host_hostname.startswith("["):
+                        host_hostname = f"[{host_hostname}]"
+
+                    if origin_hostname != host_hostname:
+                        return websockets.http11.Response(
+                            403, "Forbidden", websockets.datastructures.Headers(), b"Invalid Origin"
+                        )
+                except Exception: # noqa: BLE001
+                    return websockets.http11.Response(
+                        403, "Forbidden", websockets.datastructures.Headers(), b"Invalid Origin"
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
