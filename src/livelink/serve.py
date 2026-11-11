@@ -130,6 +130,27 @@ async def serve(
             state.active_sessions -= 1
 
     def process_request(connection: Any, request: Any) -> Any:
+        if not cors:
+            origin = request.headers.get("Origin")
+            if origin:
+                if origin == "null":
+                    return websockets.http11.Response(
+                        403, "Forbidden", websockets.datastructures.Headers(), b"CSWSH blocked: null origin"
+                    )
+                try:
+                    import urllib.parse
+                    origin_host = urllib.parse.urlparse(origin).hostname
+                    host_header = request.headers.get("Host", "")
+                    target_host = urllib.parse.urlparse(f"http://{host_header}").hostname
+                    if origin_host and target_host and origin_host != target_host:
+                        return websockets.http11.Response(
+                            403, "Forbidden", websockets.datastructures.Headers(), b"CSWSH blocked"
+                        )
+                except Exception:  # noqa: BLE001
+                    return websockets.http11.Response(
+                        403, "Forbidden", websockets.datastructures.Headers(), b"Invalid headers"
+                    )
+
         if request.path in ("/", "") and html_content:
             headers = websockets.datastructures.Headers(
                 {"Content-Type": "text/html; charset=utf-8"}
